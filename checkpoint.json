@@ -1,0 +1,25 @@
+{
+  "project_number": 14,
+  "title": "IEEE-CIS Fraud Detection",
+  "methodology": "Imbalanced binary classification with temporal and graph features. LightGBM baseline on engineered tabular features (transaction-level deltas, card aggregations, time-of-day, device-OS interactions, frequency encodings) with chronological 5-fold CV. Advanced model: heterogeneous GraphSAGE on a card-merchant-device tri-partite graph with focal loss and 5x positive-edge oversampling, built with PyTorch Geometric. HGT alternative backbone, CatBoost ensemble fallback.",
+  "phase": "Phase 1 - scaffolded code-only",
+  "status": {
+    "folder_structure": true,
+    "brief_written": true,
+    "dataset_downloaded": false,
+    "eda_notebook_built": true,
+    "refs_verified_count": 30,
+    "baseline_script_built": true,
+    "advanced_script_built": true,
+    "manuscript_word_count": 4145,
+    "presentation_built": true
+  },
+  "needs_main_session_execution": [
+    "notebooks/01_EDA.ipynb",
+    "src/model_baseline.py",
+    "src/model_advanced.py"
+  ],
+  "blockers": [
+    "Dataset not auto-downloaded: IEEE-CIS Fraud Detection is behind Kaggle competition rules acceptance (web-only) and weighs ~700 MB. The kaggle CLI command and post-extraction layout are documented in data/README.md; user runs `kaggle competitions download -c ieee-fraud-detection` manually after accepting the rules at https://www.kaggle.com/competitions/ieee-fraud-detection."
+  ]
+}

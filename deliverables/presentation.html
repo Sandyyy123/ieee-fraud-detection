@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IEEE-CIS Fraud Detection - LightGBM + Heterogeneous GNN</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; font-size: 16px; }
+  body {
+    background: #0f172a; color: #e2e8f0;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    line-height: 1.7; min-height: 100vh;
+  }
+  nav {
+    position: sticky; top: 0; z-index: 1000;
+    background: #0f172aee; backdrop-filter: blur(12px);
+    border-bottom: 1px solid #1e293b; padding: 0.5rem 0;
+    overflow-x: auto; white-space: nowrap;
+  }
+  nav .nav-inner { max-width: 1200px; margin: 0 auto; padding: 0 1rem; display: flex; gap: 0.15rem; align-items: center; }
+  nav a { color: #94a3b8; text-decoration: none; font-size: 0.78rem; padding: 0.4rem 0.65rem; border-radius: 6px; transition: all 0.2s; flex-shrink: 0; }
+  nav a:hover, nav a:focus { color: #38bdf8; background: #1e293b; }
+  nav .nav-title { color: #38bdf8; font-weight: 700; font-size: 0.85rem; margin-right: 0.6rem; flex-shrink: 0; }
+  main { max-width: 1100px; margin: 0 auto; padding: 1.2rem 1.6rem 4rem; }
+  section { margin-bottom: 4rem; padding-top: 3.5rem; }
+  section:first-of-type { padding-top: 1rem; }
+  h1 {
+    font-size: 2.5rem; font-weight: 800; line-height: 1.2;
+    background: linear-gradient(135deg, #38bdf8, #a78bfa, #f472b6);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 0.6rem;
+  }
+  .subtitle { color: #94a3b8; font-size: 1.05rem; margin-bottom: 1.4rem; }
+  h2 {
+    font-size: 1.7rem; font-weight: 700; color: #38bdf8;
+    margin-bottom: 1.2rem; padding-bottom: 0.4rem; border-bottom: 2px solid #1e293b;
+  }
+  h3 { font-size: 1.18rem; font-weight: 600; margin: 1.4rem 0 0.6rem; color: #a78bfa; }
+  p { margin-bottom: 0.9rem; }
+  ul, ol { margin: 0.5rem 0 1rem 1.6rem; }
+  li { margin-bottom: 0.35rem; }
+  strong { color: #f8fafc; }
+  a { color: #38bdf8; text-decoration: none; border-bottom: 1px dashed #1e293b; }
+  a:hover { color: #a78bfa; border-bottom-color: #a78bfa; }
+  .box { border-radius: 10px; padding: 1.1rem 1.3rem; margin: 1rem 0 1.2rem; }
+  .box-pink   { background: #f472b610; border-left: 4px solid #f472b6; }
+  .box-green  { background: #34d39910; border-left: 4px solid #34d399; }
+  .box-blue   { background: #38bdf810; border-left: 4px solid #38bdf8; }
+  .box-purple { background: #a78bfa10; border-left: 4px solid #a78bfa; }
+  .box-amber  { background: #fbbf2410; border-left: 4px solid #fbbf24; }
+  pre { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 1.1rem 1.3rem; overflow-x: auto; margin: 0.8rem 0 1.2rem; }
+  pre code { font-family: 'Cascadia Code', 'Consolas', monospace; font-size: 0.85rem; line-height: 1.6; color: #e2e8f0; }
+  p code, li code, td code { background: #1e293b; padding: 0.15rem 0.4rem; border-radius: 4px; font-family: 'Cascadia Code', 'Consolas', monospace; font-size: 0.88em; color: #38bdf8; }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.92rem; }
+  th, td { padding: 0.6rem 0.9rem; text-align: left; border-bottom: 1px solid #1e293b; }
+  th { background: #1e293b; color: #38bdf8; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  tr:hover { background: #1e293b40; }
+  .hero {
+    background: linear-gradient(135deg, #0f172a, #1e293b 60%, #0f172a);
+    padding: 3rem 2rem; border-radius: 16px; margin-bottom: 2rem;
+    border: 1px solid #334155; text-align: left;
+  }
+  .hero .meta { color: #94a3b8; font-size: 0.95rem; margin-top: 1rem; }
+  .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.8rem; margin-top: 1rem; }
+  .meta-grid .item { background: #1e293b; padding: 0.7rem 0.9rem; border-radius: 8px; border-left: 3px solid #38bdf8; }
+  .meta-grid .item .lbl { display: block; font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.2rem; }
+  .meta-grid .item .val { font-weight: 700; color: #e2e8f0; font-size: 0.95rem; }
+  img { max-width: 100%; height: auto; border-radius: 10px; margin: 0.8rem 0; border: 1px solid #1e293b; }
+  footer { text-align: center; color: #64748b; font-size: 0.85rem; padding: 2rem 1rem; border-top: 1px solid #1e293b; margin-top: 3rem; }
+</style>
+</head>
+<body>
+<nav><div class="nav-inner">
+  <span class="nav-title">Project 14: IEEE-CIS Fraud</span>
+  <a href="#overview">Overview</a>
+  <a href="#motivation">Motivation</a>
+  <a href="#data">Data</a>
+  <a href="#methods">Methods</a>
+  <a href="#baseline">Baseline</a>
+  <a href="#advanced">Advanced</a>
+  <a href="#discussion">Discussion</a>
+  <a href="#conclusion">Conclusion</a>
+  <a href="#refs">References</a>
+</div></nav>
+<main>
+
+<section id="overview" class="hero">
+  <h1>Detecting E-commerce Payment Fraud</h1>
+  <div class="subtitle">LightGBM baseline plus heterogeneous graph neural network on the IEEE-CIS / Vesta dataset (Kaggle 2019).</div>
+  <div class="meta-grid">
+    <div class="item"><span class="lbl">Task</span><span class="val">Imbalanced binary classification</span></div>
+    <div class="item"><span class="lbl">Records</span><span class="val">590,540 transactions, 393 features</span></div>
+    <div class="item"><span class="lbl">Positive rate</span><span class="val">~3.5% (28:1 imbalance)</span></div>
+    <div class="item"><span class="lbl">Domain</span><span class="val">DACH banking / AML</span></div>
+    <div class="item"><span class="lbl">Stack</span><span class="val">LightGBM + PyG HeteroSAGE</span></div>
+    <div class="item"><span class="lbl">Phase</span><span class="val">Phase 1 - code-only</span></div>
+  </div>
+</section>
+
+<section id="motivation">
+  <h2>1. Motivation</h2>
+  <p>Card-not-present payment fraud is the dominant residual loss vector in European retail banking. Production fraud-detection systems share three constraints:</p>
+  <ul>
+    <li><strong>Cost-asymmetric errors.</strong> A missed fraud costs the chargeback amount; a blocked legitimate transaction costs customer churn plus operational review. Pure ROC-AUC is insufficient; the deliverable evaluates PR-AUC and a cost-weighted score.</li>
+    <li><strong>Sub-second latency.</strong> Authorisation decisions resolve in &lt;250 ms. Tree ensembles fit; full GNN inference does not, so the GNN is positioned as a near-real-time scoring layer (post-authorisation review queue, daily-cached embeddings).</li>
+    <li><strong>Heavy class imbalance.</strong> ~3.5% on IEEE-CIS, often &lt;0.5% in DACH retail-banking AML monitoring. Resampling, class weighting, and focal loss are all evaluated.</li>
+  </ul>
+  <div class="box box-amber">
+    <strong>Regulatory framing.</strong> Under the EU AI Act, fraud and credit scoring are high-risk systems requiring documentation, transparency, and human oversight. Under BaFin operational-risk schedules, every model decision must be reproducible from logged inputs.
+  </div>
+</section>
+
+<section id="data">
+  <h2>2. Dataset</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>Source</td><td>Kaggle competition <code>ieee-fraud-detection</code> (Vesta Corporation, IEEE-CIS, October 2019)</td></tr>
+      <tr><td>Files</td><td><code>train_transaction.csv</code> (590,540 x 394), <code>train_identity.csv</code> (144,233 x 41), test counterparts</td></tr>
+      <tr><td>Target</td><td><code>isFraud</code> (binary, ~3.5% positive)</td></tr>
+      <tr><td>Time grain</td><td><code>TransactionDT</code> = seconds elapsed from a fixed reference (not calendar timestamp)</td></tr>
+      <tr><td>Identity coverage</td><td>~24% of training transactions have an identity row (left join)</td></tr>
+    </tbody>
+  </table>
+  <p>Feature blocks: core (<code>TransactionDT</code>, <code>TransactionAmt</code>, <code>ProductCD</code>), card identifiers (<code>card1</code>...<code>card6</code>), addresses (<code>addr1</code>, <code>addr2</code>), email domains (<code>P_emaildomain</code>, <code>R_emaildomain</code>), counting features (<code>C1</code>...<code>C14</code>), time-deltas (<code>D1</code>...<code>D15</code>), match flags (<code>M1</code>...<code>M9</code>), Vesta-engineered V-block (<code>V1</code>...<code>V339</code>), identity (<code>id_01</code>...<code>id_38</code>, <code>DeviceType</code>, <code>DeviceInfo</code>).</p>
+</section>
+
+<section id="methods">
+  <h2>3. Methods</h2>
+  <h3>3.1 Validation protocol</h3>
+  <p><strong>Chronological 5-fold CV.</strong> Random k-fold inflates validation ROC-AUC by 0.02-0.04 on this dataset because it leaks future card / merchant information into training. Each fold trains on the first k-th of the timeline and validates on the next k-th, mirroring the Kaggle public/private split.</p>
+  <h3>3.2 Baseline feature blocks (LightGBM)</h3>
+  <ul>
+    <li><strong>Time decomposition.</strong> <code>tx_day</code>, <code>tx_hour</code>, <code>tx_dow</code> from <code>TransactionDT</code>.</li>
+    <li><strong>Time-since-last per <code>card1</code>.</strong> <code>dt_since_card1 = TransactionDT.diff()</code> after sort.</li>
+    <li><strong>Rolling aggregations per <code>card1</code>.</strong> Cumulative count, sum, mean of <code>TransactionAmt</code> (Whitrow 2008, Bahnsen 2016).</li>
+    <li><strong>Device-OS interaction.</strong> <code>DeviceType x id_30</code>.</li>
+    <li><strong>Frequency encoding</strong> for high-cardinality columns; training-fold frequency map reused on validation to avoid leakage.</li>
+    <li><strong>V-block missingness aggregate.</strong> Single integer <code>v_n_missing</code>.</li>
+    <li><strong>log1p(TransactionAmt)</strong> for the long right tail.</li>
+  </ul>
+  <p>Hyperparameters: <code>num_leaves=255</code>, <code>learning_rate=0.03</code>, <code>min_child_samples=80</code>, <code>is_unbalance=True</code>, up to 2000 boosting rounds with 100-round early stopping.</p>
+  <h3>3.3 Advanced: heterogeneous GNN</h3>
+  <p>Three node types: <strong>Card</strong> (<code>card1</code> hash), <strong>Merchant</strong> (<code>ProductCD x addr1 x P_emaildomain</code>), <strong>Device</strong> (<code>DeviceInfo x id_30 x id_31</code>). Three edge types: <code>(Card, transacted_at, Merchant)</code> (supervised, target = <code>isFraud</code>), <code>(Card, used_from, Device)</code>, <code>(Merchant, seen_via, Device)</code>.</p>
+  <p>Architecture: heterogeneous GraphSAGE (Hamilton 2017), 2 message-passing layers, hidden 128, dropout 0.3. Edge head concatenates source-card embedding, destination-merchant embedding, and edge attributes <code>[log_amt, dt_norm]</code>. Loss: focal loss (<code>gamma=2</code>, <code>alpha=0.25</code>) on the supervised edge type, with 5x positive-edge oversampling at the batch level (PC-GNN style).</p>
+  <p><strong>Alternative backbone:</strong> Heterogeneous Graph Transformer (Hu 2020), four attention heads, held in reserve.<br>
+  <strong>Fallback:</strong> Three-seed CatBoost ensemble (seeds 42, 1337, 7), mean-blended; triggered if PyG is unavailable or GNN val AUC &lt; 0.85 after 30 epochs.</p>
+</section>
+
+<section id="baseline">
+  <h2>4. Baseline Results</h2>
+  <div class="box box-blue">
+    <strong>Status:</strong> Code-only scaffold (Phase 1). Numerical results filled in after running <code>python src/model_baseline.py</code> in the main session.
+  </div>
+  <table>
+    <thead><tr><th>Fold</th><th>Train</th><th>Val</th><th>ROC-AUC</th><th>PR-AUC</th><th>Cost @ 0.5</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td></tr>
+      <tr><td>2</td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td></tr>
+      <tr><td>3</td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td></tr>
+      <tr><td>4</td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td></tr>
+      <tr><td>5</td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td><td>TBD</td></tr>
+      <tr><td><strong>Mean</strong></td><td>-</td><td>-</td><td><strong>TBD</strong></td><td><strong>TBD</strong></td><td><strong>TBD</strong></td></tr>
+    </tbody>
+  </table>
+  <p>Public-Kaggle single-model territory clusters around 0.96 ROC-AUC. The baseline is calibrated to that magnitude rather than the 0.97-plus territory that requires aggressive UID engineering and post-competition disclosed tricks.</p>
+</section>
+
+<section id="advanced">
+  <h2>5. Advanced Results (HeteroGNN)</h2>
+  <div class="box box-blue">
+    <strong>Status:</strong> Code-only scaffold (Phase 1). Numerical results filled in after running <code>python src/model_advanced.py</code> in the main session.
+  </div>
+  <table>
+    <thead><tr><th>Entity</th><th>Count</th></tr></thead>
+    <tbody>
+      <tr><td>Card nodes</td><td>TBD (~13k expected)</td></tr>
+      <tr><td>Merchant nodes</td><td>TBD</td></tr>
+      <tr><td>Device nodes</td><td>TBD</td></tr>
+      <tr><td>Card-merchant edges (supervised)</td><td>TBD</td></tr>
+      <tr><td>Card-device edges (auxiliary)</td><td>TBD</td></tr>
+      <tr><td>Merchant-device edges (auxiliary)</td><td>TBD</td></tr>
+    </tbody>
+  </table>
+  <ul>
+    <li>HeteroGraphSAGE val ROC-AUC: <strong>TBD</strong>, val PR-AUC: <strong>TBD</strong>.</li>
+    <li>CatBoost ensemble fallback mean ROC-AUC across seeds: <strong>TBD</strong>.</li>
+    <li>Final blended ensemble (LightGBM + GNN, equal weights) holdout ROC-AUC: <strong>TBD</strong>.</li>
+  </ul>
+</section>
+
+<section id="discussion">
+  <h2>6. Discussion</h2>
+  <h3>Imbalance handling at two levels</h3>
+  <p>The pipeline applies imbalance handling at both the sampler level (5x positive edge sampling for the GNN, <code>is_unbalance=True</code> for LightGBM) and the loss level (focal loss for the GNN). Either alone is insufficient at this scale of imbalance.</p>
+  <h3>Anonymised features and graph construction</h3>
+  <p>Vesta does not expose merchant identity. The <code>(ProductCD, addr1, P_emaildomain)</code> proxy is coarse and conflates many distinct merchants, biasing the GNN toward signals at the (product-category, region, email-domain) level. Real-world DACH systems retain hashed merchant IDs and avoid this proxy.</p>
+  <h3>Production constraints not exercised</h3>
+  <ul>
+    <li><strong>Authorisation latency.</strong> Production GNNs pre-compute embeddings on a daily schedule and serve a cached MLP head; not benchmarked here.</li>
+    <li><strong>Delayed labels.</strong> Real card-fraud labels arrive after one week to one month; IEEE-CIS labels are fully supervised (optimistic relative to production).</li>
+    <li><strong>Audit and explainability.</strong> TreeSHAP over LightGBM is in-scope; GNN integrated gradients on edge attributes is Phase 2.</li>
+  </ul>
+</section>
+
+<section id="conclusion">
+  <h2>7. Conclusion</h2>
+  <ul>
+    <li>Two-stage stack: LightGBM baseline (engineered tabular features, chronological 5-fold CV, class-imbalance handling) plus heterogeneous GraphSAGE on a card-merchant-device tri-partite graph (focal loss, 5x positive oversampling).</li>
+    <li>CatBoost ensemble fallback for environments without PyTorch Geometric.</li>
+    <li>Cost-weighted evaluation grounded in DACH card-not-present economics, alongside ROC-AUC and PR-AUC.</li>
+    <li>Phase 1 deliverables: scaffolded code, EDA notebook, manuscript, and references. Phase 2: run scripts, fill in numerical results, ship deployment-ready embeddings.</li>
+  </ul>
+</section>
+
+<section id="refs">
+  <h2>8. Top references</h2>
+  <ol>
+    <li>Chen, T., Guestrin, C. <em>XGBoost: A Scalable Tree Boosting System</em>. SIGKDD 2016. DOI: 10.1145/2939672.2939785</li>
+    <li>Hamilton, W. L., Ying, R., Leskovec, J. <em>Inductive Representation Learning on Large Graphs (GraphSAGE)</em>. NeurIPS 2017.</li>
+    <li>Hu, Z., Dong, Y., Wang, K., Sun, Y. <em>Heterogeneous Graph Transformer</em>. The Web Conference 2020. DOI: 10.1145/3366423.3380027</li>
+    <li>Liu, Y., Ao, X., Qin, Z., et al. <em>Pick and Choose: A GNN-based Imbalanced Learning Approach for Fraud Detection (PC-GNN)</em>. The Web Conference 2021. DOI: 10.1145/3442381.3449989</li>
+    <li>Lin, T.-Y., Goyal, P., Girshick, R., He, K., Dollar, P. <em>Focal Loss for Dense Object Detection</em>. IEEE TPAMI 2020. DOI: 10.1109/TPAMI.2018.2858826</li>
+  </ol>
+  <p>Full verified list (30 references) in <code>reports/references.md</code>.</p>
+</section>
+
+<footer>
+  Sandeep Grover - Liora MLE Programme, Cohort 6973 - Project 14 (IEEE-CIS Fraud Detection) - Phase 1 scaffold, May 2026.
+</footer>
+</main>
+</body>
+</html>
