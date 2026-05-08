@@ -78,7 +78,7 @@ def load_data() -> pd.DataFrame:
 # Graph construction
 # -----------------------------------------------------------------------------
 
-def build_graph(df: pd.DataFrame):
+def build_graph(df: pd.DataFrame, train_mask: np.ndarray | None = None):
     """Build a heterogeneous PyG graph from the transaction table.
 
     Returns a torch_geometric.data.HeteroData object with:
@@ -89,6 +89,17 @@ def build_graph(df: pd.DataFrame):
       data['card', 'transacted_at', 'merchant'].edge_attr  [log_amt, dt_norm]
       data['card', 'transacted_at', 'merchant'].y          (transaction-level isFraud)
       ...
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Full transaction table.
+    train_mask : np.ndarray of bool, optional
+        Row-aligned boolean mask flagging rows that belong to the training partition.
+        Used for label-derived node aggregates only. If None (e.g. inference time),
+        the function falls back to using all rows and prints a warning. The graph
+        topology (edges, edge_attr, y) is always built from the full df, since
+        the supervised loss is masked at the edge level downstream.
     """
     import torch
     from torch_geometric.data import HeteroData
@@ -114,24 +125,60 @@ def build_graph(df: pd.DataFrame):
     df["card_node"] = df["card1"].map(card_uid)
     df["merch_node"] = df["merchant_id"].map(merch_uid)
     df["dev_node"] = df["device_id"].map(dev_uid)
-    df = df.dropna(subset=["card_node", "merch_node", "dev_node"]).copy()
+    keep = df[["card_node", "merch_node", "dev_node"]].notna().all(axis=1).values
+    if train_mask is not None:
+        # Align the caller's train_mask with the same row-drop applied to df
+        train_mask = np.asarray(train_mask, dtype=bool)
+        if len(train_mask) != len(df):
+            raise ValueError(
+                f"train_mask length {len(train_mask)} does not match df length {len(df)}"
+            )
+        train_mask = train_mask[keep]
+    df = df.loc[keep].copy()
     df["card_node"] = df["card_node"].astype(int)
     df["merch_node"] = df["merch_node"].astype(int)
     df["dev_node"] = df["dev_node"].astype(int)
 
-    # Per-node aggregated features (training-only; for inference, use rolling stats up to T)
+    # CORRECTNESS FIX (2026-05-08, Improver QA #3, target leak in node features):
+    # Previously, fraud_rate was aggregated over the full df, which meant validation-fold
+    # labels were absorbed into card/merchant/device node features (column index 3) before
+    # the train/val edge split downstream. Even though the supervised loss was masked at
+    # the edge level, the GNN encoder could read leaked val labels via the node-feature
+    # pathway, producing optimistic val AUC.
+    #
+    # Correction: the label-derived aggregate (fraud_rate) is now computed only over rows
+    # flagged by train_mask. Label-free aggregates (count n, mean_amt, std_amt) stay full
+    # df since they do not carry the supervised target. Nodes that appear only in the val
+    # partition receive fraud_rate = 0.0 (a neutral prior, equivalent to "unseen at train
+    # time"); they still get full-data count and amount stats so they are not zeroed out.
+    if train_mask is None:
+        print("WARNING: build_graph called without train_mask; fraud_rate uses full df. "
+              "This is only safe at pure inference time.")
+        df_train_for_labels = df
+    else:
+        df_train_for_labels = df.loc[train_mask]
+        print(f"build_graph: fraud_rate aggregated over {len(df_train_for_labels):,} "
+              f"training rows out of {len(df):,} total rows (leak-safe).")
+
+    # Per-node aggregated features. Label-free stats use full df; label-derived
+    # fraud_rate uses train-only df_train_for_labels.
     def agg(group_col, n_nodes):
-        g = df.groupby(group_col).agg(
+        # Label-free aggregates (count and amount stats) computed over full df.
+        g_full = df.groupby(group_col).agg(
             n=("isFraud", "size"),
             mean_amt=("TransactionAmt", "mean"),
             std_amt=("TransactionAmt", "std"),
+        ).fillna(0.0)
+        # Label-derived aggregate computed over training rows only.
+        g_train = df_train_for_labels.groupby(group_col).agg(
             fraud_rate=("isFraud", "mean"),
         ).fillna(0.0)
         feats = np.zeros((n_nodes, 4), dtype=np.float32)
-        feats[g.index.values, 0] = np.log1p(g["n"].values)
-        feats[g.index.values, 1] = np.log1p(g["mean_amt"].values)
-        feats[g.index.values, 2] = np.log1p(g["std_amt"].values.astype(float))
-        feats[g.index.values, 3] = g["fraud_rate"].values
+        feats[g_full.index.values, 0] = np.log1p(g_full["n"].values)
+        feats[g_full.index.values, 1] = np.log1p(g_full["mean_amt"].values)
+        feats[g_full.index.values, 2] = np.log1p(g_full["std_amt"].values.astype(float))
+        # Nodes absent from the training partition keep fraud_rate = 0.0 (default zeros init).
+        feats[g_train.index.values, 3] = g_train["fraud_rate"].values
         return torch.from_numpy(feats)
 
     data = HeteroData()
@@ -223,12 +270,23 @@ def train_gnn(df: pd.DataFrame) -> dict:
     import torch
     from torch_geometric.loader import LinkNeighborLoader
 
-    data, _df_used = build_graph(df)
+    # CORRECTNESS FIX (2026-05-08, Improver QA #3): compute the chronological 80/20
+    # train mask on the row-level df FIRST, before constructing node features, so
+    # build_graph can aggregate label-derived features over training rows only.
+    edge_t = ("card", "transacted_at", "merchant")
+    dt_vals = df["TransactionDT"].values
+    row_order = np.argsort(dt_vals)
+    row_cutoff = int(0.8 * len(row_order))
+    row_train_mask = np.zeros(len(df), dtype=bool)
+    row_train_mask[row_order[:row_cutoff]] = True
+
+    data, _df_used = build_graph(df, train_mask=row_train_mask)
     metadata = data.metadata()
     in_dims = {nt: data[nt].x.size(-1) for nt in data.node_types}
 
-    # Chronological 80 / 20 split on the supervised edge type
-    edge_t = ("card", "transacted_at", "merchant")
+    # Edge-level chronological 80 / 20 split on the supervised edge type. After
+    # build_graph drops rows with missing nodes, the surviving rows define the
+    # supervised edges; recompute the mask on the post-drop ordering.
     cm_dt = data[edge_t].edge_attr[:, 1]  # already normalised dt
     order = torch.argsort(cm_dt)
     cutoff = int(0.8 * len(order))
