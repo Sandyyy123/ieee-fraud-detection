@@ -90,7 +90,7 @@ See `data/README.md` for full setup instructions. Dataset acceptance required vi
 
 ```bash
 git clone https://github.com/Sandyyy123/ieee-fraud-detection.git
-cd liora-14-ieee-fraud
+cd ieee-fraud-detection
 pip install -r requirements.txt
 
 # Download dataset first (see data/README.md)
