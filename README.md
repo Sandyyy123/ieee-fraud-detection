@@ -89,7 +89,7 @@ See `data/README.md` for full setup instructions. Dataset acceptance required vi
 ## Quick Start
 
 ```bash
-git clone https://github.com/Sandyyy123/liora-14-ieee-fraud.git
+git clone https://github.com/Sandyyy123/ieee-fraud-detection.git
 cd liora-14-ieee-fraud
 pip install -r requirements.txt
 
