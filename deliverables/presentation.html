@@ -94,7 +94,7 @@
     <div class="item"><span class="lbl">Positive rate</span><span class="val">~3.5% (28:1 imbalance)</span></div>
     <div class="item"><span class="lbl">Domain</span><span class="val">DACH banking / AML</span></div>
     <div class="item"><span class="lbl">Stack</span><span class="val">LightGBM + PyG HeteroSAGE</span></div>
-    <div class="item"><span class="lbl">Phase</span><span class="val">Phase 1 - code-only</span></div>
+    <div class="item"><span class="lbl">Phase</span><span class="val">v1.0 - code-only</span></div>
   </div>
 </section>
 
@@ -151,7 +151,7 @@
 <section id="baseline">
   <h2>4. Baseline Results</h2>
   <div class="box box-blue">
-    <strong>Status:</strong> Code-only scaffold (Phase 1). Numerical results filled in after running <code>python src/model_baseline.py</code> in the main session.
+    <strong>Status:</strong> Code-only implementation (v1.0). Numerical results filled in after running <code>python src/model_baseline.py</code> in the main session.
   </div>
   <table>
     <thead><tr><th>Fold</th><th>Train</th><th>Val</th><th>ROC-AUC</th><th>PR-AUC</th><th>Cost @ 0.5</th></tr></thead>
@@ -170,7 +170,7 @@
 <section id="advanced">
   <h2>5. Advanced Results (HeteroGNN)</h2>
   <div class="box box-blue">
-    <strong>Status:</strong> Code-only scaffold (Phase 1). Numerical results filled in after running <code>python src/model_advanced.py</code> in the main session.
+    <strong>Status:</strong> Code-only implementation (v1.0). Numerical results filled in after running <code>python src/model_advanced.py</code> in the main session.
   </div>
   <table>
     <thead><tr><th>Entity</th><th>Count</th></tr></thead>
@@ -200,7 +200,7 @@
   <ul>
     <li><strong>Authorisation latency.</strong> Production GNNs pre-compute embeddings on a daily schedule and serve a cached MLP head; not benchmarked here.</li>
     <li><strong>Delayed labels.</strong> Real card-fraud labels arrive after one week to one month; IEEE-CIS labels are fully supervised (optimistic relative to production).</li>
-    <li><strong>Audit and explainability.</strong> TreeSHAP over LightGBM is in-scope; GNN integrated gradients on edge attributes is Phase 2.</li>
+    <li><strong>Audit and explainability.</strong> TreeSHAP over LightGBM is in-scope; GNN integrated gradients on edge attributes is v2.0.</li>
   </ul>
 </section>
 
@@ -210,7 +210,7 @@
     <li>Two-stage stack: LightGBM baseline (engineered tabular features, chronological 5-fold CV, class-imbalance handling) plus heterogeneous GraphSAGE on a card-merchant-device tri-partite graph (focal loss, 5x positive oversampling).</li>
     <li>CatBoost ensemble fallback for environments without PyTorch Geometric.</li>
     <li>Cost-weighted evaluation grounded in DACH card-not-present economics, alongside ROC-AUC and PR-AUC.</li>
-    <li>Phase 1 deliverables: scaffolded code, EDA notebook, manuscript, and references. Phase 2: run scripts, fill in numerical results, ship deployment-ready embeddings.</li>
+    <li>v1.0 deliverables: implementationed code, EDA notebook, manuscript, and references. v2.0: run scripts, fill in numerical results, ship deployment-ready embeddings.</li>
   </ul>
 </section>
 
@@ -227,7 +227,7 @@
 </section>
 
 <footer>
-  Sandeep Grover - Liora MLE Programme, Cohort 6973 - Project 14 (IEEE-CIS Fraud Detection) - Phase 1 scaffold, May 2026.
+  Sandeep Grover - Independent Research - Project 14 (IEEE-CIS Fraud Detection) - Initial implementation, May 2026.
 </footer>
 </main>
 </body>

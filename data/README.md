@@ -9,14 +9,14 @@ Hosted by IEEE Computational Intelligence Society in partnership with Vesta Corp
 ## Why not auto-downloaded
 
 - Competition T&C requires explicit acceptance via the Kaggle web UI before the API will release the files. Programmatic acceptance is not supported.
-- Total payload is ~700 MB compressed, ~1.7 GB uncompressed. Per Liora Phase 1 rules (>500 MB and behind competition acceptance) this is documented rather than auto-fetched.
+- Total payload is ~700 MB compressed, ~1.7 GB uncompressed. Per Portfolio v1.0 rules (>500 MB and behind competition acceptance) this is documented rather than auto-fetched.
 
 ## Download command
 
 After accepting the competition rules at the Kaggle URL above:
 
 ```bash
-cd /root/AI/liora_projects/14_ieee_fraud/data
+cd /root/AI/project_root/data
 kaggle competitions download -c ieee-fraud-detection
 unzip ieee-fraud-detection.zip
 rm ieee-fraud-detection.zip

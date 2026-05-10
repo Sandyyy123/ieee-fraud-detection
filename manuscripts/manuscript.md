@@ -1,9 +1,9 @@
 # Imbalanced Binary Classification on E-commerce Payment Fraud: Gradient Boosting Baseline and Heterogeneous Graph Neural Network on the IEEE-CIS / Vesta Dataset
 
-**Authors:** Sandeep Grover, Liora MLE Programme, Cohort 6973
+**Authors:** Sandeep Grover, Independent Research
 **Affiliation:** Independent researcher, Mössingen, Germany
 **Dataset:** IEEE-CIS Fraud Detection (Vesta Corporation, Kaggle, 2019)
-**Project:** Liora MLE Weiterbildung, Project #14
+**Project:** ML Engineering Portfolio
 **Date:** May 2026
 
 ---
@@ -64,7 +64,7 @@ Three metrics are reported on each validation fold and on the chronological hold
 
 ### 2.6 Reproducibility
 
-Code lives in `notebooks/01_EDA.ipynb`, `src/model_baseline.py`, and `src/model_advanced.py` under `/root/AI/liora_projects/14_ieee_fraud/`. The trained LightGBM booster is persisted to `deliverables/lgbm_baseline.txt`, the trained GNN state dictionary to `deliverables/gnn_advanced.pt`, fold metrics to `deliverables/metrics_baseline.json` and `deliverables/metrics_advanced.json`, and a self-contained presentation to `deliverables/presentation.html`. The Kaggle download command and post-extraction layout are documented in `data/README.md`; the dataset is not auto-fetched in this scaffolding pass because Kaggle's competition-rules acceptance is web-only.
+Code lives in `notebooks/01_EDA.ipynb`, `src/model_baseline.py`, and `src/model_advanced.py` under `/root/AI/project_root/`. The trained LightGBM booster is persisted to `deliverables/lgbm_baseline.txt`, the trained GNN state dictionary to `deliverables/gnn_advanced.pt`, fold metrics to `deliverables/metrics_baseline.json` and `deliverables/metrics_advanced.json`, and a self-contained presentation to `deliverables/presentation.html`. The Kaggle download command and post-extraction layout are documented in `data/README.md`; the dataset is not auto-fetched in this implementationing pass because Kaggle's competition-rules acceptance is web-only.
 
 ## 3. Results
 
@@ -122,7 +122,7 @@ The IEEE-CIS test set is the chronological tail of the timeline, separated by ap
 
 ### 4.4 Production constraints not exercised in this benchmark
 
-Three production constraints are visible in the literature but not exercised in this paper. (i) Authorisation latency: the GNN as implemented here scores transactions by re-running message passing over the full graph, which is too slow for sub-second authorisation. The production pattern is to pre-compute card and merchant embeddings on a daily schedule, cache them in an online feature store, and score authorisation transactions via a small MLP head over the cached embeddings; this is the deployment analogue of the architecture but is not benchmarked here. (ii) Delayed labels: Dal Pozzolo and colleagues [Dal Pozzolo 2018] document that fraud labels arrive with a delay of one week to one month in production, and that the practical training pattern is a verification-budget framework rather than fully supervised training. The IEEE-CIS labels are fully supervised by construction, which makes the benchmark optimistic relative to production conditions. (iii) Regulatory and audit overhead: under the EU AI Act, fraud-scoring models are high-risk systems requiring documentation, transparency, and human oversight; under BaFin operational-risk schedules, every model decision must be reproducible from logged inputs. The TreeSHAP attribution used over the LightGBM baseline [Lundberg 2020] is a step in this direction; a comparable post-hoc attribution scheme for the GNN, such as integrated gradients on edge attributes plus subgraph extraction around the scored edge, is a planned Phase 2 deliverable.
+Three production constraints are visible in the literature but not exercised in this paper. (i) Authorisation latency: the GNN as implemented here scores transactions by re-running message passing over the full graph, which is too slow for sub-second authorisation. The production pattern is to pre-compute card and merchant embeddings on a daily schedule, cache them in an online feature store, and score authorisation transactions via a small MLP head over the cached embeddings; this is the deployment analogue of the architecture but is not benchmarked here. (ii) Delayed labels: Dal Pozzolo and colleagues [Dal Pozzolo 2018] document that fraud labels arrive with a delay of one week to one month in production, and that the practical training pattern is a verification-budget framework rather than fully supervised training. The IEEE-CIS labels are fully supervised by construction, which makes the benchmark optimistic relative to production conditions. (iii) Regulatory and audit overhead: under the EU AI Act, fraud-scoring models are high-risk systems requiring documentation, transparency, and human oversight; under BaFin operational-risk schedules, every model decision must be reproducible from logged inputs. The TreeSHAP attribution used over the LightGBM baseline [Lundberg 2020] is a step in this direction; a comparable post-hoc attribution scheme for the GNN, such as integrated gradients on edge attributes plus subgraph extraction around the scored edge, is a planned v2.0 deliverable.
 
 ### 4.5 Limitations
 

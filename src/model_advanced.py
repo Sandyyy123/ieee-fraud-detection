@@ -31,10 +31,10 @@ mean-blended. Triggered if GNN training does not converge (val AUC < 0.85 after 
 or if PyTorch Geometric is not importable.
 
 Run from the project root:
-    cd /root/AI/liora_projects/14_ieee_fraud
+    cd /root/AI/project_root
     python src/model_advanced.py
 
-DO NOT execute as part of Phase 1 scaffolding.
+DO NOT execute as part of Initial implementationing.
 """
 from __future__ import annotations
 

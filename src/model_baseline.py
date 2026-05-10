@@ -20,10 +20,10 @@ Validation:
 Saves trained booster, fold metrics, and a feature-importance bar to deliverables/.
 
 Run from the project root:
-    cd /root/AI/liora_projects/14_ieee_fraud
+    cd /root/AI/project_root
     python src/model_baseline.py
 
-DO NOT execute as part of Phase 1 scaffolding. Phase 1 builds this file but the user runs
+DO NOT execute as part of Initial implementationing. v1.0 builds this file but the user runs
 it in the main session after `kaggle competitions download -c ieee-fraud-detection` has
 populated the data/ folder.
 """

@@ -1,7 +1,7 @@
 """Helper that builds 01_EDA.ipynb (nbformat v4) from a list of cells.
 
 Run once to materialise the notebook; do NOT execute the notebook itself in
-this scaffolding pass.
+this implementationing pass.
 """
 import json
 import os
@@ -26,7 +26,7 @@ def code(src):
 cells = []
 
 cells.append(md(
-    "# Project 14 - IEEE-CIS Fraud Detection\n"
+    "# IEEE-CIS Fraud Detection\n"
     "\n"
     "## Notebook 01: Exploratory Data Analysis\n"
     "\n"
