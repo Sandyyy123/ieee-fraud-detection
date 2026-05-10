@@ -1,7 +1,7 @@
 # Imbalanced Binary Classification on E-commerce Payment Fraud: Gradient Boosting Baseline and Heterogeneous Graph Neural Network on the IEEE-CIS / Vesta Dataset
 
 **Authors:** Sandeep Grover, Independent Research
-**Affiliation:** Independent researcher, Mössingen, Germany
+**Affiliation:** Independent researcher, Germany
 **Dataset:** IEEE-CIS Fraud Detection (Vesta Corporation, Kaggle, 2019)
 **Project:** ML Engineering Portfolio
 **Date:** May 2026
