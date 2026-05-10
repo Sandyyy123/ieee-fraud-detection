@@ -20,7 +20,7 @@ Validation:
 Saves trained booster, fold metrics, and a feature-importance bar to deliverables/.
 
 Run from the project root:
-    cd /root/AI/project_root
+    cd .
     python src/model_baseline.py
 
 DO NOT execute as part of Initial implementationing. v1.0 builds this file but the user runs
