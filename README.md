@@ -130,7 +130,7 @@ Top Kaggle solutions reached **0.9459 private-leaderboard ROC-AUC** using stacke
 
 ## Author
 
-**Dr. Sandeep Grover** — PhD Data Science, independent ML researcher, Mössingen, Germany.
+**Dr. Sandeep Grover** — PhD Data Science, independent ML researcher, Germany.
 
 ---
 
