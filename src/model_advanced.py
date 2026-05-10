@@ -31,7 +31,7 @@ mean-blended. Triggered if GNN training does not converge (val AUC < 0.85 after 
 or if PyTorch Geometric is not importable.
 
 Run from the project root:
-    cd /root/AI/project_root
+    cd .
     python src/model_advanced.py
 
 DO NOT execute as part of Initial implementationing.
