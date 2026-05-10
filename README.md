@@ -1,6 +1,6 @@
 # IEEE-CIS Fraud Detection — LightGBM + Heterogeneous GNN
 
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python) ![PyTorch](https://img.shields.io/badge/PyTorch-2.x-orange?logo=pytorch) ![LightGBM](https://img.shields.io/badge/LightGBM-gradient%20boosting-green) ![License](https://img.shields.io/badge/license-MIT-lightgrey)
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python) ![PyTorch](https://img.shields.io/badge/PyTorch-2.x-orange?logo=pytorch) ![LightGBM](https://img.shields.io/badge/LightGBM-gradient%20boosting-green) ![License](https://img.shields.io/badge/license-CC%20BY--NC%204.0-lightgrey)
 
 Production-grade two-stage fraud detection pipeline on the **IEEE-CIS / Vesta Corporation** dataset (590,540 transactions, 393 features, 3.5% fraud prevalence). Combines a LightGBM tabular baseline with a heterogeneous Graph Neural Network that models the card-merchant-device co-occurrence structure.
 
