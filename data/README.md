@@ -16,7 +16,7 @@ Hosted by IEEE Computational Intelligence Society in partnership with Vesta Corp
 After accepting the competition rules at the Kaggle URL above:
 
 ```bash
-cd /root/AI/project_root/data
+cd data/
 kaggle competitions download -c ieee-fraud-detection
 unzip ieee-fraud-detection.zip
 rm ieee-fraud-detection.zip
@@ -60,6 +60,6 @@ Identity tables join to transaction tables on `TransactionID`. Left join is the 
 ## Disk-space check before download
 
 ```bash
-df -h /root/AI
+df -h .
 # need ~3 GB free for download + extraction + intermediate caches
 ```
