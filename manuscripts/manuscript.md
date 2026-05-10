@@ -64,7 +64,7 @@ Three metrics are reported on each validation fold and on the chronological hold
 
 ### 2.6 Reproducibility
 
-Code lives in `notebooks/01_EDA.ipynb`, `src/model_baseline.py`, and `src/model_advanced.py` under `/root/AI/project_root/`. The trained LightGBM booster is persisted to `deliverables/lgbm_baseline.txt`, the trained GNN state dictionary to `deliverables/gnn_advanced.pt`, fold metrics to `deliverables/metrics_baseline.json` and `deliverables/metrics_advanced.json`, and a self-contained presentation to `deliverables/presentation.html`. The Kaggle download command and post-extraction layout are documented in `data/README.md`; the dataset is not auto-fetched in this implementationing pass because Kaggle's competition-rules acceptance is web-only.
+Code lives in `notebooks/01_EDA.ipynb`, `src/model_baseline.py`, and `src/model_advanced.py` under `./`. The trained LightGBM booster is persisted to `deliverables/lgbm_baseline.txt`, the trained GNN state dictionary to `deliverables/gnn_advanced.pt`, fold metrics to `deliverables/metrics_baseline.json` and `deliverables/metrics_advanced.json`, and a self-contained presentation to `deliverables/presentation.html`. The Kaggle download command and post-extraction layout are documented in `data/README.md`; the dataset is not auto-fetched in this implementationing pass because Kaggle's competition-rules acceptance is web-only.
 
 ## 3. Results
 
